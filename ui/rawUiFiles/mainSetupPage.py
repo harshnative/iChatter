@@ -92,7 +92,10 @@ class Ui_Form(object):
 
 if __name__ == "__main__":
     import sys
+
+    # making the application look same across all platforms
     QtWidgets.QApplication.setStyle("Windows")
+    
     app = QtWidgets.QApplication(sys.argv)
     Form = QtWidgets.QWidget()
     ui = Ui_Form()
