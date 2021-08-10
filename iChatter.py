@@ -96,6 +96,9 @@ class GlobalData_main(PreGlobalData):
     # troubleshootValue
     troubleshootValue = False
 
+    # userSettings
+    userSettings = dict()
+
 
 
     # setting up the logger with temp values
@@ -169,6 +172,7 @@ elif(osUsing == "Windows"):
 
 
 
+PreGlobalData.loadingUI.setValues(5 , "setting up settings package")
 
 # class for settings functionality
 class Settings:
@@ -233,6 +237,15 @@ class Settings:
 
 if __name__ == "__main__":
 
+    
+    # getting the settings
+    userSettingsDict = Settings.returnDict()
+
+    # if the application is just installed then the username and uepProgram value is none in settings file so we need to get these value from the startup screen
+    if((str(userSettingsDict.get("username" , "None")).lower() == "none") and (str(userSettingsDict.get("uepProgram" , "None")).lower() == "none")):
+        print("hello")
+
+
 
     # setting up the logging module
 
@@ -248,7 +261,7 @@ if __name__ == "__main__":
     name="iChatterLogger",
     logfile=logFileName,
     formatter=GlobalData_main.my_formatterLog,
-    maxBytes=1000000,level=logging.INFO)
+    maxBytes=10000000,level=logging.INFO)
 
     # loadingscreen will be shown till the user end program end it
     sys.exit(GlobalData_main.loadingApp.exec_())
