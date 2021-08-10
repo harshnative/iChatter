@@ -60,6 +60,7 @@ import traceback
 import logging
 import traceback
 import time
+import hjson
 
 # importing installed packages
 from logzero import logger, logfile, setup_logger
@@ -67,6 +68,10 @@ from logzero import logger, logfile, setup_logger
 
 # importing packages
 from packages import settings
+
+
+# importing uis
+from ui import setupPageUI
 
 
 
@@ -174,7 +179,7 @@ if __name__ == "__main__":
     name="iChatterLogger",
     logfile=logFileName,
     formatter=GlobalData_main.my_formatterLog,
-    maxBytes=10000000,level=logging.INFO)
+    maxBytes=10000000,level=logging.ERROR)
 
     lhStdout = GlobalData_main.iChatterLogger.handlers[0]
     GlobalData_main.iChatterLogger.removeHandler(lhStdout)
@@ -253,16 +258,37 @@ if __name__ == "__main__":
 
     
     # getting the settings
-    userSettingsDict = Settings.returnDict()
+    GlobalData_main.userSettings = Settings.returnDict()
 
     # if the application is just installed then the username and uepProgram value is none in settings file so we need to get these value from the startup screen
-    if((str(userSettingsDict.get("username" , "None")).lower() == "none") and (str(userSettingsDict.get("uepProgram" , "None")).lower() == "none")):
-        print("hello")
+    if((str(GlobalData_main.userSettings.get("username" , "None")).lower() == "none") and (str(GlobalData_main.userSettings.get("uepProgram" , "None")).lower() == "none")):
+        setupPageApp = QtWidgets.QApplication(sys.argv)
+        setupPageForm = QtWidgets.QWidget()
+        setupPageui = setupPageUI.newUIForm(None)
+        setupPageui.setupUi(setupPageForm)
+        GlobalData_main.loadingForm.hide()
+        setupPageForm.show()
+
+        while(not(setupPageUI.GlobalData_setupPageUI.appExisted)):
+            QtCore.QCoreApplication.processEvents()
+
+        setupPageForm.close()
+        GlobalData_main.loadingForm.show()
+
+
+        print(setupPageUI.GlobalData_setupPageUI.username , setupPageUI.GlobalData_setupPageUI.uepProgram)
+
+        GlobalData_main.userSettings["username"] = setupPageUI.GlobalData_setupPageUI.username
+        GlobalData_main.userSettings["uepProgram"] = str(setupPageUI.GlobalData_setupPageUI.uepProgram)
+
+        settingsPath = Settings.settingObj.path
+        with open(settingsPath , "w+") as file:
+            file.write(hjson.dumps(GlobalData_main.userSettings))
 
 
 
     # setting up the logging module
-
+    logFileName = None
     # configuring the logging file path according to the OS
     if(GlobalData_main.isOnLinux):
         logFileName = GlobalData_main.folderPathLinux + "/" + "iChatterLogs.log"
@@ -270,12 +296,23 @@ if __name__ == "__main__":
         logFileName = GlobalData_main.folderPathWindows_simpleSlash + "/" + "iChatterLogs.log"
 
 
+
+    # configuring the troubleshoot value
+    if(str(GlobalData_main.userSettings.get("uepProgram")).lower() == "true"):
+        GlobalData_main.troubleshootValue = True
+
+    mylevel = None
+    if(GlobalData_main.troubleshootValue):
+        mylevel = logging.INFO
+    else:
+        mylevel = logging.ERROR
+
     # resetting the Global variable with the correct values
     GlobalData_main.iChatterLogger = setup_logger(
     name="iChatterLogger",
     logfile=logFileName,
     formatter=GlobalData_main.my_formatterLog,
-    maxBytes=10000000,level=logging.INFO)
+    maxBytes=10000000,level=mylevel)
 
     # remove the console handler to disable the console logging
     lhStdout = GlobalData_main.iChatterLogger.handlers[0]
