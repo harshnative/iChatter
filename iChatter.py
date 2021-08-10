@@ -106,11 +106,7 @@ class GlobalData_main(PreGlobalData):
     my_formatterLog = logging.Formatter('\n\n' + '%(filename)s , line = %(lineno)s , func = %(funcName)25s() , %(asctime)s , %(levelname)10s: %(message)s')
 
     # creating custom logger instance
-    iChatterLogger = setup_logger(
-    name="iChatterLogger",
-    logfile="iChatterLogs.log",
-    formatter=my_formatterLog,
-    maxBytes=1000000,level=logging.INFO)
+    iChatterLogger = setup_logger()
 
 
 
@@ -162,8 +158,26 @@ elif(osUsing == "Windows"):
 
 
 # iChatterLogger.setLevel(logging.DEBUG)
+if __name__ == "__main__":
+
+    # setting up the logging module log file path
+
+    # configuring the logging file path according to the OS
+    if(GlobalData_main.isOnLinux):
+        logFileName = GlobalData_main.folderPathLinux + "/" + "iChatterLogs.log"
+    elif(GlobalData_main.isOnWindows):
+        logFileName = GlobalData_main.folderPathWindows_simpleSlash + "/" + "iChatterLogs.log"
 
 
+    # resetting the Global variable with the correct values
+    GlobalData_main.iChatterLogger = setup_logger(
+    name="iChatterLogger",
+    logfile=logFileName,
+    formatter=GlobalData_main.my_formatterLog,
+    maxBytes=10000000,level=logging.INFO)
+
+    lhStdout = GlobalData_main.iChatterLogger.handlers[0]
+    GlobalData_main.iChatterLogger.removeHandler(lhStdout)
 
 
 
@@ -262,6 +276,10 @@ if __name__ == "__main__":
     logfile=logFileName,
     formatter=GlobalData_main.my_formatterLog,
     maxBytes=10000000,level=logging.INFO)
+
+    # remove the console handler to disable the console logging
+    lhStdout = GlobalData_main.iChatterLogger.handlers[0]
+    GlobalData_main.iChatterLogger.removeHandler(lhStdout)
 
     # loadingscreen will be shown till the user end program end it
     sys.exit(GlobalData_main.loadingApp.exec_())
