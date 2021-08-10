@@ -59,11 +59,14 @@ import os
 import traceback
 import logging
 import traceback
+import time
 
 # importing installed packages
 from logzero import logger, logfile, setup_logger
 
 
+# importing packages
+from packages import settings
 
 
 
@@ -118,7 +121,7 @@ class GlobalData_main(PreGlobalData):
 
 
 # increasing the loading value
-GlobalData_main.loadingUI.setValues(2 , "Determining OS")
+GlobalData_main.loadingUI.setValues(4 , "Determining OS")
 
 # Checking the users operating system and adding data to global class
 osUsing = platform.system()
@@ -156,6 +159,76 @@ elif(osUsing == "Windows"):
 
 
 # iChatterLogger.setLevel(logging.DEBUG)
+
+
+
+
+
+
+
+
+
+
+
+# class for settings functionality
+class Settings:
+
+    # setting up the object 
+    settingObj = settings.SettingsClass(GlobalData_main.folderPathWindows_simpleSlash , GlobalData_main.folderPathLinux , GlobalData_main.isOnWindows , GlobalData_main.isOnLinux)
+
+    # method to return the dict
+    @classmethod
+    def returnDict(cls):
+        try:
+            returnedDict = cls.settingObj.getDict()
+
+            # if the retruned dict length is zero then restore the settings file
+            if(len(returnedDict) == 0):
+                cls.restoreSettings()
+                time.sleep(0.5)
+
+            GlobalData_main.iChatterLogger.info("settings dict returned successfully with dict = {}".format(returnedDict))
+            return returnedDict
+
+        except Exception as e:
+            GlobalData_main.iChatterLogger.exception(str(e))
+            return {}
+
+    # method to open the settings file
+    # returns True on successfull opening 
+    # else returns false and logs error
+    @classmethod
+    def openSettingsFile(cls):
+        result = cls.settingObj.openSettings()
+
+        if(result == None):
+            GlobalData_main.iChatterLogger.info("settings file opened successfully")
+            return True
+        else:
+            GlobalData_main.iChatterLogger.exception(str(result))
+            return False
+
+    
+    # method to restore the settings file with default settings
+    @classmethod
+    def restoreSettings(cls):
+        try:
+            cls.settingObj.regenerateSettingsFile()
+            GlobalData_main.iChatterLogger.info("settings file restored succesfully successfully")
+            return True
+        except Exception as e:
+            GlobalData_main.iChatterLogger.exception(str(e))
+            return False
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
