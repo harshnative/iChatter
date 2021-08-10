@@ -4,6 +4,9 @@ apis.txt
 
 iChatterData/
 
+*.log
+
+
 pytests/
 
 logo.ico

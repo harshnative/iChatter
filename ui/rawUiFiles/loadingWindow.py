@@ -9,6 +9,9 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 import loadingWindow_qrc
 
 
