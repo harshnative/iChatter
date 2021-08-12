@@ -72,6 +72,8 @@ from packages import settings
 
 # importing uis
 from ui import setupPageUI
+from ui import enterPasswordUI
+from ui import settingsCustomUI
 
 
 
@@ -244,6 +246,14 @@ class Settings:
             return False
 
 
+    # method to write the modified settings dict to the settings file
+    @classmethod
+    def writeSettings(cls):
+        settingsPath = cls.settingObj.path
+        with open(settingsPath , "w+") as file:
+            file.write(hjson.dumps(GlobalData_main.userSettings))
+
+
 
 
 
@@ -278,12 +288,15 @@ if __name__ == "__main__":
 
         print(setupPageUI.GlobalData_setupPageUI.username , setupPageUI.GlobalData_setupPageUI.uepProgram)
 
+        # modifying the new settings and writing to the file
         GlobalData_main.userSettings["username"] = setupPageUI.GlobalData_setupPageUI.username
         GlobalData_main.userSettings["uepProgram"] = str(setupPageUI.GlobalData_setupPageUI.uepProgram)
 
-        settingsPath = Settings.settingObj.path
-        with open(settingsPath , "w+") as file:
-            file.write(hjson.dumps(GlobalData_main.userSettings))
+        Settings.writeSettings()
+
+    
+    # if the application is half installed then the password will not be set
+    if(str(GlobalData_main.userSettings.get("password" , "None")).lower() == "none"):
 
 
 

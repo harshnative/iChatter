@@ -63,6 +63,7 @@ class SettingsClass:
         settingsFile = {
   "uepProgram": "None" ,  
   "username": "None" ,
+  "password": "None" ,
 }
        
         # writing the file
