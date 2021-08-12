@@ -8,15 +8,19 @@ import string
 import settingsCustomUI
 
 
-
+# Global data class
 class GlobalData_enterPasswordUI:
     appExisted = False
     password = None
     settingsPressed = False
 
 
+
+# inheriting the Ui_Form from enterpassword for that we can edit
 class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
     def __init__(self, parent=None , firstTime = True , oldPassword = None , settingsDict = None):
+        
+        # calling the parent init
         super(newUIForm, self).__init__(parent)
 
         self.firstTime = firstTime
@@ -24,21 +28,33 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
         self.settingsDict = settingsDict
 
     def setupUi(self, Form):
+
+        # calling the parent setupUi
         super().setupUi(Form)
 
+        # if the password input is not first time , hide the confirm password lineedit input widget
         if(not(self.firstTime)):
             self.lineEdit.hide()
+        
+        # connect button
         self.continuButton.pressed.connect(self.continuePressed)
+        
+        # connect enter to presses button functionality
         self.userNameInput.returnPressed.connect(self.continuePressed)
         self.lineEdit.returnPressed.connect(self.continuePressed)
+
+        # set echo to password to show dots instead of showing the typed password
         self.userNameInput.setEchoMode(QtWidgets.QLineEdit.Password)      
         self.lineEdit.setEchoMode(QtWidgets.QLineEdit.Password)   
 
-
+        # connect button
         self.settingsButton.pressed.connect(self.settingPressed)
 
 
+    # function to execute when the settings button is pressed
     def settingPressed(self):
+
+        # animation
         self.settingsButton.setStyleSheet("background-color: rgb(150, 150, 150);\n"
         "color: rgb(0, 0, 0);\n"
         "font: 14pt \"Consolas\";\n"
@@ -55,8 +71,12 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
 
         time.sleep(0.2)
 
+
+        # get the password from input field
         password = self.userNameInput.text()
 
+
+        # show pop message if the password length is 0
         if(len(password) == 0):
             self.emptyPassword()
             self.settingsButton.setStyleSheet("background-color: rgb(120, 140, 222);\n"
@@ -71,10 +91,13 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
             return
 
 
+        # if first time then get the password from the second input field and compare both
         if(self.firstTime):
             password2 = self.lineEdit.text()
 
             if(password != password2):
+
+                # if not equal show a pop up message
                 self.showPasswordDoesNotMatch()
 
                 self.settingsButton.setStyleSheet("background-color: rgb(120, 140, 222);\n"
@@ -89,6 +112,8 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
 
                 return
 
+
+        # if not first time then check with old password , if incorrect show error
         elif(self.oldPassword != None):
             password2 = self.lineEdit.text()
 
@@ -108,6 +133,7 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
                 return
 
 
+        # set the values obtained to global class
         GlobalData_enterPasswordUI.password = password
         GlobalData_enterPasswordUI.settingsPressed = True
         GlobalData_enterPasswordUI.appExisted = True
@@ -119,8 +145,10 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
 
 
 
-
+    # function to execute when the continue button is pressed
     def continuePressed(self):
+
+        # animation
         self.continuButton.setStyleSheet("background-color: rgb(150, 150, 150);\n"
         "color: rgb(0, 0, 0);\n"
         "font: 14pt \"Consolas\";\n"
@@ -138,8 +166,10 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
         time.sleep(0.2)
 
 
+        # get password
         password = self.userNameInput.text()
 
+        # show pop up if len password = 0
         if(len(password) == 0):
             self.emptyPassword()
             self.continuButton.setStyleSheet("background-color: rgb(115, 210, 22);\n"
@@ -153,6 +183,9 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
                 "")
             return
 
+
+        # show pop up if password does not match with confirm password
+        # only if first time
         if(self.firstTime):
             password2 = self.lineEdit.text()
 
@@ -171,6 +204,8 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
 
                 return
 
+
+        # show pop up if password does not match with old password
         elif(self.oldPassword != None):
             password2 = self.lineEdit.text()
 
@@ -191,13 +226,15 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
 
 
 
-
+        # set the values obtained to global class
         GlobalData_enterPasswordUI.password = str(password)
         GlobalData_enterPasswordUI.settingsPressed = False
 
         GlobalData_enterPasswordUI.appExisted = True
 
 
+
+    # pop up messgae for when the password does not match with confirm password
     def showPasswordDoesNotMatch(self):
         msg = QtWidgets.QMessageBox()
 
@@ -226,7 +263,7 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
         runMsg = msg.exec_()
 
 
-
+    # pop up message when the password does not match with old password
     def showIncorrect(self):
         msg = QtWidgets.QMessageBox()
 
@@ -240,7 +277,8 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
 
         runMsg = msg.exec_()
 
-
+    
+    # pop up message when the len password = 0
     def emptyPassword(self):
         msg = QtWidgets.QMessageBox()
 

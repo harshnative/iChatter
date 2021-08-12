@@ -7,6 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import string
 
 
+# Global data class
 class GlobalData_setupPageUI:
     uepProgram = None
     appExisted = False
@@ -14,22 +15,29 @@ class GlobalData_setupPageUI:
 
 
 
+# inheriting the Ui_Form from mainSetupPage for that we can edit
 class newUIForm(QtWidgets.QWidget , mainSetupPage.Ui_Form):
     def __init__(self, parent=None):
+        
+        # calling the parent init
         super(newUIForm, self).__init__(parent)
 
     def setupUi(self, Form):
+        
+        # calling the parent setupUi
         super().setupUi(Form)
+
+        # setting up connections
         self.ContinueButton.pressed.connect(self.continuePressed)
         self.userNameInput.returnPressed.connect(self.continuePressed)
 
 
-    # def closeEvent(self, event):
-    #     print("in")
-    #     sys.exit()
 
-
+    # function to execute when the continue button is pressed
     def continuePressed(self):
+        
+        
+        # animation
         self.ContinueButton.setStyleSheet("background-color: rgb(150, 150, 150);\n"
 "color: rgb(0, 0, 0);\n"
 "font: 14pt \"Consolas\";\n"
@@ -44,9 +52,13 @@ class newUIForm(QtWidgets.QWidget , mainSetupPage.Ui_Form):
         QtCore.QCoreApplication.processEvents()
 
         time.sleep(0.2)
+
+        # getting value from userinput and checkbox
         userName = self.userNameInput.text()
         uepValue = self.uepCheckbox.isChecked()
 
+
+        # only keeping letters in the username
         stringList = list(list(string.ascii_lowercase + string.ascii_uppercase))
 
         newUserName = ""
@@ -54,6 +66,7 @@ class newUIForm(QtWidgets.QWidget , mainSetupPage.Ui_Form):
             if(i in stringList):
                 newUserName = newUserName + i
 
+        # show pop up if the username is empty
         if(len(newUserName) == 0):
             self.emptyUserName()
             self.ContinueButton.setStyleSheet("background-color: rgb(115, 210, 22);\n"
@@ -68,11 +81,13 @@ class newUIForm(QtWidgets.QWidget , mainSetupPage.Ui_Form):
             return
             
 
+        # set the values obtained to global class
         GlobalData_setupPageUI.username = str(newUserName)
         GlobalData_setupPageUI.uepProgram = bool(uepValue)
 
         GlobalData_setupPageUI.appExisted = True
 
+    # pop up when the username is not provided
     def emptyUserName(self):
         msg = QtWidgets.QMessageBox()
 

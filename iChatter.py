@@ -129,7 +129,7 @@ class GlobalData_main(PreGlobalData):
 
 
 # increasing the loading value
-GlobalData_main.loadingUI.setValues(4 , "Determining OS")
+GlobalData_main.loadingUI.setValues(10 , "Determining OS")
 
 # Checking the users operating system and adding data to global class
 osUsing = platform.system()
@@ -196,7 +196,7 @@ if __name__ == "__main__":
 
 
 
-PreGlobalData.loadingUI.setValues(5 , "setting up settings package")
+PreGlobalData.loadingUI.setValues(12 , "setting up settings package")
 
 # class for settings functionality
 class Settings:
@@ -262,11 +262,25 @@ class Settings:
 
 
 
-
+# function to quit the application
 def forceQuit(obj):
-    GlobalData_main.loadingApp.closeAllWindows()
-    obj.closeAllWindows()
+
+    # close loading window
+    try:
+        GlobalData_main.loadingApp.closeAllWindows()
+    except Exception:
+        # if the windows is already closed
+        pass
+
+    # close object window
+    try:
+        obj.closeAllWindows()
+    except Exception:
+        # if the windows is already closed
+        pass
+    
     sys.exit()
+
 
 
 
@@ -279,20 +293,26 @@ if __name__ == "__main__":
 
     # if the application is just installed then the username and uepProgram value is none in settings file so we need to get these value from the startup screen
     if((str(GlobalData_main.userSettings.get("username" , "None")).lower() == "none") and (str(GlobalData_main.userSettings.get("uepProgram" , "None")).lower() == "none")):
+        
+        # setting up the setup page GUI
         setupPageApp = QtWidgets.QApplication(sys.argv)
         setupPageForm = QtWidgets.QWidget()
         setupPageui = setupPageUI.newUIForm(None)
         setupPageui.setupUi(setupPageForm)
+
+        # hide the loading page and show setup page
         GlobalData_main.loadingForm.hide()
         setupPageForm.show()
 
+
+        # wait until the user press the continue button on the setup page or force closes the app
         while(not(setupPageUI.GlobalData_setupPageUI.appExisted)):
             QtCore.QCoreApplication.processEvents()
             if(not(setupPageForm.isVisible())):
                 forceQuit(setupPageApp)
 
 
-
+        # close the setup page and re show the loading page
         setupPageForm.close()
         setupPageApp.closeAllWindows()
         GlobalData_main.loadingForm.show()
@@ -306,76 +326,8 @@ if __name__ == "__main__":
 
         Settings.writeSettings()
 
-    
-    # if the application is half installed then the password will not be set
-    if(str(GlobalData_main.userSettings.get("password" , "None")).lower() == "none"):
-        enterPasswordApp = QtWidgets.QApplication(sys.argv)
-        enterPasswordForm = QtWidgets.QWidget()
-        enterPasswordui = enterPasswordUI.newUIForm(None , firstTime=True , oldPassword=None , settingsDict=Settings.returnDict())
-        enterPasswordui.setupUi(enterPasswordForm)
-        GlobalData_main.loadingForm.hide()
-        enterPasswordForm.show()
-
-        while(not(enterPasswordUI.GlobalData_enterPasswordUI.appExisted)):
-            QtCore.QCoreApplication.processEvents()
-            if(not(enterPasswordForm.isVisible())):
-                forceQuit(enterPasswordApp)
-            
-
-        if(enterPasswordUI.GlobalData_enterPasswordUI.settingsPressed):
-            settingsApp = QtWidgets.QApplication(sys.argv)
-            settingsForm = QtWidgets.QWidget()
-            settingsui = settingsCustomUI.newUIForm(None , userName=Settings.returnDict().get("username" , None))
-            settingsui.setupUi(settingsForm)
-            settingsForm.show()
-
-            while(not(settingsCustomUI.GlobalData_settingsCustomUI.appExisted)):
-                QtCore.QCoreApplication.processEvents()
-                if(not(settingsForm.isVisible())):
-                    forceQuit(settingsApp)
-
-
-        print(settingsCustomUI.GlobalData_settingsCustomUI.username)
-        print(settingsCustomUI.GlobalData_settingsCustomUI.password)
-        print(enterPasswordUI.GlobalData_enterPasswordUI.password)
-
-        GlobalData_main.userSettings["password"] = bool(True)
-
-
-    else:
-
-        enterPasswordApp = QtWidgets.QApplication(sys.argv)
-        enterPasswordForm = QtWidgets.QWidget()
-        enterPasswordui = enterPasswordUI.newUIForm(None , firstTime=False , oldPassword="mypass" , settingsDict=Settings.returnDict())
-        enterPasswordui.setupUi(enterPasswordForm)
-        GlobalData_main.loadingForm.hide()
-        enterPasswordForm.show()
-
-        while(not(enterPasswordUI.GlobalData_enterPasswordUI.appExisted)):
-            QtCore.QCoreApplication.processEvents()
-            if(not(enterPasswordForm.isVisible())):
-                forceQuit(enterPasswordApp)
-
-        if(enterPasswordUI.GlobalData_enterPasswordUI.settingsPressed):
-            settingsApp = QtWidgets.QApplication(sys.argv)
-            settingsForm = QtWidgets.QWidget()
-            settingsui = settingsCustomUI.newUIForm(None , userName=Settings.returnDict().get("username" , None))
-            settingsui.setupUi(settingsForm)
-            settingsForm.show()
-
-            while(not(settingsCustomUI.GlobalData_settingsCustomUI.appExisted)):
-                QtCore.QCoreApplication.processEvents()
-                if(not(settingsForm.isVisible())):
-                    forceQuit(settingsApp)
-
-
-        print(enterPasswordUI.GlobalData_enterPasswordUI.password)
-
-    enterPasswordForm.close()
-    enterPasswordApp.closeAllWindows()
 
     GlobalData_main.loadingForm.show()
-
 
     # setting up the logging module
     logFileName = None
@@ -384,7 +336,6 @@ if __name__ == "__main__":
         logFileName = GlobalData_main.folderPathLinux + "/" + "iChatterLogs.log"
     elif(GlobalData_main.isOnWindows):
         logFileName = GlobalData_main.folderPathWindows_simpleSlash + "/" + "iChatterLogs.log"
-
 
 
     # configuring the troubleshoot value
@@ -408,8 +359,100 @@ if __name__ == "__main__":
     lhStdout = GlobalData_main.iChatterLogger.handlers[0]
     GlobalData_main.iChatterLogger.removeHandler(lhStdout)
 
-    # loadingscreen will be shown till the user end program end it
-    sys.exit(GlobalData_main.loadingApp.exec_())
+
+
+
+
+
+
+if __name__ == "__main__":
+    # if the application is half installed then the password will not be set
+    if(str(GlobalData_main.userSettings.get("password" , "None")).lower() == "none"):
+        
+        # setting up the enter password page
+        enterPasswordApp = QtWidgets.QApplication(sys.argv)
+        enterPasswordForm = QtWidgets.QWidget()
+        enterPasswordui = enterPasswordUI.newUIForm(None , firstTime=True , oldPassword=None , settingsDict=Settings.returnDict())
+        enterPasswordui.setupUi(enterPasswordForm)
+        
+        # hide loading page and show password page
+        GlobalData_main.loadingForm.hide()
+        enterPasswordForm.show()
+
+
+
+        # wait until the user press the continue button on the enter password page or force closes the app
+        while(not(enterPasswordUI.GlobalData_enterPasswordUI.appExisted)):
+            QtCore.QCoreApplication.processEvents()
+            if(not(enterPasswordForm.isVisible())):
+                forceQuit(enterPasswordApp)
+            
+
+        # if the user pressed the setting button on the password page
+        if(enterPasswordUI.GlobalData_enterPasswordUI.settingsPressed):
+            
+            # setting up the enter settings page
+            settingsApp = QtWidgets.QApplication(sys.argv)
+            settingsForm = QtWidgets.QWidget()
+            settingsui = settingsCustomUI.newUIForm(None , userName=Settings.returnDict().get("username" , None))
+            settingsui.setupUi(settingsForm)
+            settingsForm.show()
+
+            # wait until the user press the continue button on the settings page or force closes the app
+            while(not(settingsCustomUI.GlobalData_settingsCustomUI.appExisted)):
+                QtCore.QCoreApplication.processEvents()
+                if(not(settingsForm.isVisible())):
+                    forceQuit(settingsApp)
+
+
+        print(settingsCustomUI.GlobalData_settingsCustomUI.username)
+        print(settingsCustomUI.GlobalData_settingsCustomUI.password)
+        print(enterPasswordUI.GlobalData_enterPasswordUI.password)
+
+        # first time password setting is complete
+        GlobalData_main.userSettings["password"] = bool(True)
+
+    # if the user is not using the app first time
+    else:
+
+        # setting up the enter password page
+        enterPasswordApp = QtWidgets.QApplication(sys.argv)
+        enterPasswordForm = QtWidgets.QWidget()
+        enterPasswordui = enterPasswordUI.newUIForm(None , firstTime=False , oldPassword="mypass" , settingsDict=Settings.returnDict())
+        enterPasswordui.setupUi(enterPasswordForm)
+        GlobalData_main.loadingForm.hide()
+        enterPasswordForm.show()
+
+        # wait until the user press the continue button on the enter password page or force closes the app
+        while(not(enterPasswordUI.GlobalData_enterPasswordUI.appExisted)):
+            QtCore.QCoreApplication.processEvents()
+            if(not(enterPasswordForm.isVisible())):
+                forceQuit(enterPasswordApp)
+
+        # if the user pressed the setting button on the password page
+        if(enterPasswordUI.GlobalData_enterPasswordUI.settingsPressed):
+            settingsApp = QtWidgets.QApplication(sys.argv)
+            settingsForm = QtWidgets.QWidget()
+            settingsui = settingsCustomUI.newUIForm(None , userName=Settings.returnDict().get("username" , None))
+            settingsui.setupUi(settingsForm)
+            settingsForm.show()
+
+            # wait until the user press the continue button on the settings page or force closes the app
+            while(not(settingsCustomUI.GlobalData_settingsCustomUI.appExisted)):
+                QtCore.QCoreApplication.processEvents()
+                if(not(settingsForm.isVisible())):
+                    forceQuit(settingsApp)
+
+
+        print(enterPasswordUI.GlobalData_enterPasswordUI.password)
+
+
+    # close the password page
+    enterPasswordForm.close()
+    enterPasswordApp.closeAllWindows()
+    GlobalData_main.loadingForm.show()
     
 
+    # loadingscreen will be shown till the user end program end it
+    sys.exit(GlobalData_main.loadingApp.exec_())
 
