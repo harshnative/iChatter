@@ -5,20 +5,23 @@ from rawUiFiles import enterPassword
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 import string
+import settingsCustomUI
+
 
 
 class GlobalData_enterPasswordUI:
     appExisted = False
     password = None
-
+    settingsPressed = False
 
 
 class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
-    def __init__(self, parent=None , firstTime = True , oldPassword = None):
+    def __init__(self, parent=None , firstTime = True , oldPassword = None , settingsDict = None):
         super(newUIForm, self).__init__(parent)
 
         self.firstTime = firstTime
-        self.oldPassword = None
+        self.oldPassword = oldPassword
+        self.settingsDict = settingsDict
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -29,7 +32,92 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
         self.userNameInput.returnPressed.connect(self.continuePressed)
         self.lineEdit.returnPressed.connect(self.continuePressed)
         self.userNameInput.setEchoMode(QtWidgets.QLineEdit.Password)      
-        self.lineEdit.setEchoMode(QtWidgets.QLineEdit.Password)      
+        self.lineEdit.setEchoMode(QtWidgets.QLineEdit.Password)   
+
+
+        self.settingsButton.pressed.connect(self.settingPressed)
+
+
+    def settingPressed(self):
+        self.settingsButton.setStyleSheet("background-color: rgb(150, 150, 150);\n"
+        "color: rgb(0, 0, 0);\n"
+        "font: 14pt \"Consolas\";\n"
+        "margin-left: 64px;\n"
+        "margin-right: 64px;\n"
+        "padding-top: 16px;\n"
+        "padding-bottom: 16px;\n"
+        "margin-bottom: 32px;\n"
+        "margin-top: 32px;\n"
+        "\n"
+        "")
+
+        QtCore.QCoreApplication.processEvents()
+
+        time.sleep(0.2)
+
+        password = self.userNameInput.text()
+
+        if(len(password) == 0):
+            self.emptyPassword()
+            self.settingsButton.setStyleSheet("background-color: rgb(120, 140, 222);\n"
+                "color: rgb(255, 255, 255);\n"
+                "font: 14pt \"Consolas\";\n"
+                "padding-top: 16px;\n"
+                "padding-bottom: 16px;\n"
+                "margin-bottom: 32px;\n"
+                "margin-top: 32px;\n"
+                "\n"
+                "")
+            return
+
+
+        if(self.firstTime):
+            password2 = self.lineEdit.text()
+
+            if(password != password2):
+                self.showPasswordDoesNotMatch()
+
+                self.settingsButton.setStyleSheet("background-color: rgb(120, 140, 222);\n"
+                "color: rgb(255, 255, 255);\n"
+                "font: 14pt \"Consolas\";\n"
+                "padding-top: 16px;\n"
+                "padding-bottom: 16px;\n"
+                "margin-bottom: 32px;\n"
+                "margin-top: 32px;\n"
+                "\n"
+                "")
+
+                return
+
+        elif(self.oldPassword != None):
+            password2 = self.lineEdit.text()
+
+            if(password != str(self.oldPassword)):
+                self.showIncorrect()
+
+                self.settingsButton.setStyleSheet("background-color: rgb(120, 140, 222);\n"
+                "color: rgb(255, 255, 255);\n"
+                "font: 14pt \"Consolas\";\n"
+                "padding-top: 16px;\n"
+                "padding-bottom: 16px;\n"
+                "margin-bottom: 32px;\n"
+                "margin-top: 32px;\n"
+                "\n"
+                "")
+
+                return
+
+
+        GlobalData_enterPasswordUI.password = password
+        GlobalData_enterPasswordUI.settingsPressed = True
+        GlobalData_enterPasswordUI.appExisted = True
+
+
+
+
+
+
+
 
 
     def continuePressed(self):
@@ -51,6 +139,19 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
 
 
         password = self.userNameInput.text()
+
+        if(len(password) == 0):
+            self.emptyPassword()
+            self.continuButton.setStyleSheet("background-color: rgb(115, 210, 22);\n"
+                "color: rgb(255, 255, 255);\n"
+                "font: 14pt \"Consolas\";\n"
+                "padding-top: 16px;\n"
+                "padding-bottom: 16px;\n"
+                "margin-bottom: 32px;\n"
+                "margin-top: 32px;\n"
+                "\n"
+                "")
+            return
 
         if(self.firstTime):
             password2 = self.lineEdit.text()
@@ -92,6 +193,7 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
 
 
         GlobalData_enterPasswordUI.password = str(password)
+        GlobalData_enterPasswordUI.settingsPressed = False
 
         GlobalData_enterPasswordUI.appExisted = True
 
@@ -131,6 +233,20 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
         msg.setWindowTitle("iChatter Error")
 
         msg.setText("incorrect password")
+
+        msg.setIcon(QtWidgets.QMessageBox.Critical)
+
+        msg.setStandardButtons(QtWidgets.QMessageBox.Retry)
+
+        runMsg = msg.exec_()
+
+
+    def emptyPassword(self):
+        msg = QtWidgets.QMessageBox()
+
+        msg.setWindowTitle("iChatter Error")
+
+        msg.setText("password cannot be empty")
 
         msg.setIcon(QtWidgets.QMessageBox.Critical)
 

@@ -1,6 +1,7 @@
 
 # essentail imports
 import sys
+from typing import Set
 
 
 
@@ -61,6 +62,7 @@ import logging
 import traceback
 import time
 import hjson
+import sys
 
 # importing installed packages
 from logzero import logger, logfile, setup_logger
@@ -193,6 +195,7 @@ if __name__ == "__main__":
 
 
 
+
 PreGlobalData.loadingUI.setValues(5 , "setting up settings package")
 
 # class for settings functionality
@@ -260,6 +263,10 @@ class Settings:
 
 
 
+def forceQuit(obj):
+    GlobalData_main.loadingApp.closeAllWindows()
+    obj.closeAllWindows()
+    sys.exit()
 
 
 
@@ -281,8 +288,13 @@ if __name__ == "__main__":
 
         while(not(setupPageUI.GlobalData_setupPageUI.appExisted)):
             QtCore.QCoreApplication.processEvents()
+            if(not(setupPageForm.isVisible())):
+                forceQuit(setupPageApp)
+
+
 
         setupPageForm.close()
+        setupPageApp.closeAllWindows()
         GlobalData_main.loadingForm.show()
 
 
@@ -297,7 +309,72 @@ if __name__ == "__main__":
     
     # if the application is half installed then the password will not be set
     if(str(GlobalData_main.userSettings.get("password" , "None")).lower() == "none"):
+        enterPasswordApp = QtWidgets.QApplication(sys.argv)
+        enterPasswordForm = QtWidgets.QWidget()
+        enterPasswordui = enterPasswordUI.newUIForm(None , firstTime=True , oldPassword=None , settingsDict=Settings.returnDict())
+        enterPasswordui.setupUi(enterPasswordForm)
+        GlobalData_main.loadingForm.hide()
+        enterPasswordForm.show()
 
+        while(not(enterPasswordUI.GlobalData_enterPasswordUI.appExisted)):
+            QtCore.QCoreApplication.processEvents()
+            if(not(enterPasswordForm.isVisible())):
+                forceQuit(enterPasswordApp)
+            
+
+        if(enterPasswordUI.GlobalData_enterPasswordUI.settingsPressed):
+            settingsApp = QtWidgets.QApplication(sys.argv)
+            settingsForm = QtWidgets.QWidget()
+            settingsui = settingsCustomUI.newUIForm(None , userName=Settings.returnDict().get("username" , None))
+            settingsui.setupUi(settingsForm)
+            settingsForm.show()
+
+            while(not(settingsCustomUI.GlobalData_settingsCustomUI.appExisted)):
+                QtCore.QCoreApplication.processEvents()
+                if(not(settingsForm.isVisible())):
+                    forceQuit(settingsApp)
+
+
+        print(settingsCustomUI.GlobalData_settingsCustomUI.username)
+        print(settingsCustomUI.GlobalData_settingsCustomUI.password)
+        print(enterPasswordUI.GlobalData_enterPasswordUI.password)
+
+        GlobalData_main.userSettings["password"] = bool(True)
+
+
+    else:
+
+        enterPasswordApp = QtWidgets.QApplication(sys.argv)
+        enterPasswordForm = QtWidgets.QWidget()
+        enterPasswordui = enterPasswordUI.newUIForm(None , firstTime=False , oldPassword="mypass" , settingsDict=Settings.returnDict())
+        enterPasswordui.setupUi(enterPasswordForm)
+        GlobalData_main.loadingForm.hide()
+        enterPasswordForm.show()
+
+        while(not(enterPasswordUI.GlobalData_enterPasswordUI.appExisted)):
+            QtCore.QCoreApplication.processEvents()
+            if(not(enterPasswordForm.isVisible())):
+                forceQuit(enterPasswordApp)
+
+        if(enterPasswordUI.GlobalData_enterPasswordUI.settingsPressed):
+            settingsApp = QtWidgets.QApplication(sys.argv)
+            settingsForm = QtWidgets.QWidget()
+            settingsui = settingsCustomUI.newUIForm(None , userName=Settings.returnDict().get("username" , None))
+            settingsui.setupUi(settingsForm)
+            settingsForm.show()
+
+            while(not(settingsCustomUI.GlobalData_settingsCustomUI.appExisted)):
+                QtCore.QCoreApplication.processEvents()
+                if(not(settingsForm.isVisible())):
+                    forceQuit(settingsApp)
+
+
+        print(enterPasswordUI.GlobalData_enterPasswordUI.password)
+
+    enterPasswordForm.close()
+    enterPasswordApp.closeAllWindows()
+
+    GlobalData_main.loadingForm.show()
 
 
     # setting up the logging module
