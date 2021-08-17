@@ -1,5 +1,6 @@
 
 # essentail imports
+from genericpath import isfile
 import sys
 from typing import Set
 
@@ -63,13 +64,16 @@ import traceback
 import time
 import hjson
 import sys
+import sqlite3
 
 # importing installed packages
 from logzero import logger, logfile, setup_logger
 
 
+
 # importing packages
 from packages import settings
+from packages.sqlitewrapper import SqliteCipher
 
 
 # importing uis
@@ -99,6 +103,10 @@ class GlobalData_main(PreGlobalData):
     folderPathWindows_simpleSlash = r"C:/programData/iChatter"
 
 
+    # db path
+    dbPath = str()
+
+
     # current version of software
     currentVersion = 0.1
 
@@ -116,6 +124,12 @@ class GlobalData_main(PreGlobalData):
 
     # creating custom logger instance
     iChatterLogger = setup_logger()
+
+
+
+
+    # pysqlitecipher obj 
+    dbObj = None
 
 
 
@@ -188,6 +202,13 @@ if __name__ == "__main__":
     lhStdout = GlobalData_main.iChatterLogger.handlers[0]
     GlobalData_main.iChatterLogger.removeHandler(lhStdout)
 
+
+
+    # setting up db path
+    if(GlobalData_main.isOnWindows):
+        GlobalData_main.dbPath = GlobalData_main.folderPathWindows_simpleSlash + "/iChatter.db"
+    else:
+        GlobalData_main.dbPath = GlobalData_main.folderPathLinux + "/iChatter.db"
 
 
 
@@ -317,9 +338,6 @@ if __name__ == "__main__":
         setupPageApp.closeAllWindows()
         GlobalData_main.loadingForm.show()
 
-
-        print(setupPageUI.GlobalData_setupPageUI.username , setupPageUI.GlobalData_setupPageUI.uepProgram)
-
         # modifying the new settings and writing to the file
         GlobalData_main.userSettings["username"] = setupPageUI.GlobalData_setupPageUI.username
         GlobalData_main.userSettings["uepProgram"] = str(setupPageUI.GlobalData_setupPageUI.uepProgram)
@@ -366,8 +384,9 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
+
     # if the application is half installed then the password will not be set
-    if(str(GlobalData_main.userSettings.get("password" , "None")).lower() == "none"):
+    if((str(GlobalData_main.userSettings.get("password" , "None")).lower() == "none")):
         
         # setting up the enter password page
         enterPasswordApp = QtWidgets.QApplication(sys.argv)
@@ -405,20 +424,40 @@ if __name__ == "__main__":
                     forceQuit(settingsApp)
 
 
-        print(settingsCustomUI.GlobalData_settingsCustomUI.username)
-        print(settingsCustomUI.GlobalData_settingsCustomUI.password)
-        print(enterPasswordUI.GlobalData_enterPasswordUI.password)
+        password = enterPasswordUI.GlobalData_enterPasswordUI.password
+
+        try:
+            obj = SqliteCipher(dataBasePath=GlobalData_main.dbPath , checkSameThread=False , password=password)
+        except RuntimeError:
+            if(GlobalData_main.isOnWindows):
+                os.system("del iChatter.db")
+            else:
+                os.system("rm iChatter.db")
+
+            obj = SqliteCipher(dataBasePath=GlobalData_main.dbPath , checkSameThread=False , password=password)
+            
 
         # first time password setting is complete
         GlobalData_main.userSettings["password"] = bool(True)
 
+        Settings.writeSettings()
+
     # if the user is not using the app first time
     else:
+
+        # getting the password from db SHA512 Pass
+        sqlObjTemp = sqlite3.connect(GlobalData_main.dbPath , check_same_thread=False)
+
+        cursorFromSql = sqlObjTemp.execute("SELECT * FROM authenticationTable;")
+        for i in cursorFromSql:
+            sha512PassFromDB = i[0]
+
+
 
         # setting up the enter password page
         enterPasswordApp = QtWidgets.QApplication(sys.argv)
         enterPasswordForm = QtWidgets.QWidget()
-        enterPasswordui = enterPasswordUI.newUIForm(None , firstTime=False , oldPassword="mypass" , settingsDict=Settings.returnDict())
+        enterPasswordui = enterPasswordUI.newUIForm(None , firstTime=False , oldPassword=sha512PassFromDB , settingsDict=Settings.returnDict())
         enterPasswordui.setupUi(enterPasswordForm)
         GlobalData_main.loadingForm.hide()
         enterPasswordForm.show()
@@ -441,10 +480,27 @@ if __name__ == "__main__":
             while(not(settingsCustomUI.GlobalData_settingsCustomUI.appExisted)):
                 QtCore.QCoreApplication.processEvents()
                 if(not(settingsForm.isVisible())):
-                    forceQuit(settingsApp)
+                    settingsForm.hide()
+                    settingsApp.closeAllWindows()
+                    break
 
 
-        print(enterPasswordUI.GlobalData_enterPasswordUI.password)
+    password = enterPasswordUI.GlobalData_enterPasswordUI.password
+    GlobalData_main.dbObj = SqliteCipher(dataBasePath=GlobalData_main.dbPath , checkSameThread=False , password=password)
+
+
+    # checking if user as changed settings
+    if(enterPasswordUI.GlobalData_enterPasswordUI.settingsPressed):
+        username = settingsCustomUI.GlobalData_settingsCustomUI.username
+        password = settingsCustomUI.GlobalData_settingsCustomUI.password
+
+        if(password != ""):
+            GlobalData_main.dbObj.changePassword(password)
+
+        GlobalData_main.userSettings["username"] = username
+
+        Settings.writeSettings()
+
 
 
     # close the password page

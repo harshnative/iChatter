@@ -6,6 +6,7 @@ import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 import string
 import settingsCustomUI
+import hashlib
 
 
 # Global data class
@@ -35,6 +36,7 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
         # if the password input is not first time , hide the confirm password lineedit input widget
         if(not(self.firstTime)):
             self.lineEdit.hide()
+            self.usernameLabel.setText("Please Enter Password :")
         
         # connect button
         self.continuButton.pressed.connect(self.continuePressed)
@@ -70,6 +72,20 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
         QtCore.QCoreApplication.processEvents()
 
         time.sleep(0.2)
+
+
+        if(self.oldPassword == None):
+            self.settingsNotYetAvailable()
+            self.settingsButton.setStyleSheet("background-color: rgb(120, 140, 222);\n"
+                "color: rgb(255, 255, 255);\n"
+                "font: 14pt \"Consolas\";\n"
+                "padding-top: 16px;\n"
+                "padding-bottom: 16px;\n"
+                "margin-bottom: 32px;\n"
+                "margin-top: 32px;\n"
+                "\n"
+                "")
+            return
 
 
         # get the password from input field
@@ -115,9 +131,10 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
 
         # if not first time then check with old password , if incorrect show error
         elif(self.oldPassword != None):
-            password2 = self.lineEdit.text()
+            sha512 = hashlib.sha512(password.encode()).hexdigest()
 
-            if(password != str(self.oldPassword)):
+
+            if(sha512 != str(self.oldPassword)):
                 self.showIncorrect()
 
                 self.settingsButton.setStyleSheet("background-color: rgb(120, 140, 222);\n"
@@ -207,9 +224,11 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
 
         # show pop up if password does not match with old password
         elif(self.oldPassword != None):
-            password2 = self.lineEdit.text()
 
-            if(password != str(self.oldPassword)):
+            sha512 = hashlib.sha512(password.encode()).hexdigest()
+
+
+            if(sha512 != str(self.oldPassword)):
                 self.showIncorrect()
 
                 self.continuButton.setStyleSheet("background-color: rgb(115, 210, 22);\n"
@@ -287,6 +306,21 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
         msg.setText("password cannot be empty")
 
         msg.setIcon(QtWidgets.QMessageBox.Critical)
+
+        msg.setStandardButtons(QtWidgets.QMessageBox.Close)
+
+        runMsg = msg.exec_()
+
+    
+    # pop up message when the len password = 0
+    def settingsNotYetAvailable(self):
+        msg = QtWidgets.QMessageBox()
+
+        msg.setWindowTitle("iChatter Error")
+
+        msg.setText("Complete the setup process first to access the settings")
+
+        msg.setIcon(QtWidgets.QMessageBox.Information)
 
         msg.setStandardButtons(QtWidgets.QMessageBox.Retry)
 
