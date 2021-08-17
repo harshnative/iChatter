@@ -30,6 +30,8 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
 
     def setupUi(self, Form):
 
+        self.Form = Form
+
         # calling the parent setupUi
         super().setupUi(Form)
 
@@ -156,6 +158,8 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
         GlobalData_enterPasswordUI.appExisted = True
 
 
+        self.Form.close()
+
 
 
 
@@ -250,6 +254,8 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
         GlobalData_enterPasswordUI.settingsPressed = False
 
         GlobalData_enterPasswordUI.appExisted = True
+
+        self.Form.close()
 
 
 

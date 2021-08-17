@@ -23,6 +23,8 @@ class newUIForm(QtWidgets.QWidget , mainSetupPage.Ui_Form):
         super(newUIForm, self).__init__(parent)
 
     def setupUi(self, Form):
+
+        self.Form = Form
         
         # calling the parent setupUi
         super().setupUi(Form)
@@ -86,6 +88,8 @@ class newUIForm(QtWidgets.QWidget , mainSetupPage.Ui_Form):
         GlobalData_setupPageUI.uepProgram = bool(uepValue)
 
         GlobalData_setupPageUI.appExisted = True
+
+        self.Form.close()
 
     # pop up when the username is not provided
     def emptyUserName(self):

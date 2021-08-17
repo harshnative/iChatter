@@ -65,6 +65,7 @@ import time
 import hjson
 import sys
 import sqlite3
+import time
 
 # importing installed packages
 from logzero import logger, logfile, setup_logger
@@ -327,10 +328,9 @@ if __name__ == "__main__":
 
 
         # wait until the user press the continue button on the setup page or force closes the app
-        while(not(setupPageUI.GlobalData_setupPageUI.appExisted)):
-            QtCore.QCoreApplication.processEvents()
-            if(not(setupPageForm.isVisible())):
-                forceQuit(setupPageApp)
+        setupPageApp.exec_()
+        if(not(setupPageUI.GlobalData_setupPageUI.appExisted)):
+            sys.exit()
 
 
         # close the setup page and re show the loading page
@@ -401,28 +401,9 @@ if __name__ == "__main__":
 
 
         # wait until the user press the continue button on the enter password page or force closes the app
-        while(not(enterPasswordUI.GlobalData_enterPasswordUI.appExisted)):
-            QtCore.QCoreApplication.processEvents()
-            if(not(enterPasswordForm.isVisible())):
-                forceQuit(enterPasswordApp)
-            
-
-        # if the user pressed the setting button on the password page
-        if(enterPasswordUI.GlobalData_enterPasswordUI.settingsPressed):
-            
-            # setting up the enter settings page
-            settingsApp = QtWidgets.QApplication(sys.argv)
-            settingsForm = QtWidgets.QWidget()
-            settingsui = settingsCustomUI.newUIForm(None , userName=Settings.returnDict().get("username" , None))
-            settingsui.setupUi(settingsForm)
-            settingsForm.show()
-
-            # wait until the user press the continue button on the settings page or force closes the app
-            while(not(settingsCustomUI.GlobalData_settingsCustomUI.appExisted)):
-                QtCore.QCoreApplication.processEvents()
-                if(not(settingsForm.isVisible())):
-                    forceQuit(settingsApp)
-
+        enterPasswordApp.exec_()
+        if(not(enterPasswordUI.GlobalData_enterPasswordUI.appExisted)):
+            sys.exit()
 
         password = enterPasswordUI.GlobalData_enterPasswordUI.password
 
@@ -462,11 +443,9 @@ if __name__ == "__main__":
         GlobalData_main.loadingForm.hide()
         enterPasswordForm.show()
 
-        # wait until the user press the continue button on the enter password page or force closes the app
-        while(not(enterPasswordUI.GlobalData_enterPasswordUI.appExisted)):
-            QtCore.QCoreApplication.processEvents()
-            if(not(enterPasswordForm.isVisible())):
-                forceQuit(enterPasswordApp)
+        enterPasswordApp.exec_()
+        if(not(enterPasswordUI.GlobalData_enterPasswordUI.appExisted)):
+            sys.exit()
 
         # if the user pressed the setting button on the password page
         if(enterPasswordUI.GlobalData_enterPasswordUI.settingsPressed):
@@ -477,12 +456,10 @@ if __name__ == "__main__":
             settingsForm.show()
 
             # wait until the user press the continue button on the settings page or force closes the app
-            while(not(settingsCustomUI.GlobalData_settingsCustomUI.appExisted)):
-                QtCore.QCoreApplication.processEvents()
-                if(not(settingsForm.isVisible())):
-                    settingsForm.hide()
-                    settingsApp.closeAllWindows()
-                    break
+            settingsApp.exec_()
+            if(not(settingsCustomUI.GlobalData_settingsCustomUI.appExisted)):
+                settingsForm.hide()
+                settingsApp.closeAllWindows()
 
 
     password = enterPasswordUI.GlobalData_enterPasswordUI.password

@@ -24,6 +24,8 @@ class newUIForm(QtWidgets.QWidget , settingsUI.Ui_Form):
         self.userName = userName
 
     def setupUi(self, Form):
+
+        self.Form = Form
         
         # calling the parent setupUi
         super().setupUi(Form)
@@ -131,6 +133,9 @@ class newUIForm(QtWidgets.QWidget , settingsUI.Ui_Form):
         GlobalData_settingsCustomUI.username = str(newUserName)
 
         GlobalData_settingsCustomUI.appExisted = True
+
+        self.Form.close()
+
 
 
     # pop up messgae for when the password does not match with confirm password
