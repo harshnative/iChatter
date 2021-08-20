@@ -44,7 +44,7 @@ class SqliteCipher:
             
             # getting a random key from fernet
             stringKey = Fernet.generate_key().decode("utf-8")
-            
+
             # encrypting this key
             encryptedKey = onetimepad.encrypt(stringKey , sha256Pass)
             
@@ -862,7 +862,7 @@ class SqliteCipher:
         new_sha512Pass = hashlib.sha512(newPass.encode()).hexdigest()
         
         # converting password to SHA256
-        new_sha256Pass = hashlib.sha512(newPass.encode()).hexdigest()
+        new_sha256Pass = hashlib.sha256(newPass.encode()).hexdigest()
 
         key = self.stringKey
 
