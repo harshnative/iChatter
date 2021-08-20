@@ -29,6 +29,9 @@ class newUIForm(QtWidgets.QWidget , mainSetupPage.Ui_Form):
         # calling the parent setupUi
         super().setupUi(Form)
 
+        self.mainLogoLabel.setScaledContents(True)
+
+
         # setting up connections
         self.ContinueButton.pressed.connect(self.continuePressed)
         self.userNameInput.returnPressed.connect(self.continuePressed)

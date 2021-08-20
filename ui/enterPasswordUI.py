@@ -35,6 +35,12 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
         # calling the parent setupUi
         super().setupUi(Form)
 
+#         self.mainLogoLabel.setStyleSheet(u"image: url(:/newPrefix/images/Group5.svg);\n"
+# "margin-left: auto;\n"
+# "margin-right: auto;\n"
+# "padding-left: 32px;\n"
+# "padding-right: 32px;")
+
         # if the password input is not first time , hide the confirm password lineedit input widget
         if(not(self.firstTime)):
             self.lineEdit.hide()
