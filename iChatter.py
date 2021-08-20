@@ -7,7 +7,7 @@ from typing import Set
 
 
 # importing pyqt
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 
 # importing ui files
@@ -23,10 +23,10 @@ class PreGlobalData:
 
     # loading screen
     # show loading screen first
-    loadingApp = QtWidgets.QApplication(sys.argv)
-    loadingForm = QtWidgets.QWidget()
-    loadingUI = loadingWindow.Ui_Form()
-    loadingUI.setupUi(loadingForm)
+    # loadingApp = QtWidgets.QApplication(sys.argv)
+    # loadingForm = QtWidgets.QWidget()
+    # loadingUI = loadingWindow.Ui_Form()
+    # loadingUI.setupUi(loadingForm)
 
 
 
@@ -38,7 +38,6 @@ if __name__ == "__main__":
     # setting the default look of the iChatter to windows
     QtWidgets.QApplication.setStyle("Windows")
 
-    PreGlobalData.loadingForm.show()
 
 
 
@@ -53,7 +52,6 @@ if __name__ == "__main__":
 
 
 
-PreGlobalData.loadingUI.setValues(1 , "loading Modules")
 
 # importing additional modules
 import platform
@@ -143,9 +141,6 @@ class GlobalData_main(PreGlobalData):
 
 
 
-# increasing the loading value
-GlobalData_main.loadingUI.setValues(10 , "Determining OS")
-
 # Checking the users operating system and adding data to global class
 osUsing = platform.system()
 
@@ -218,7 +213,6 @@ if __name__ == "__main__":
 
 
 
-PreGlobalData.loadingUI.setValues(12 , "setting up settings package")
 
 # class for settings functionality
 class Settings:
@@ -287,16 +281,9 @@ class Settings:
 # function to quit the application
 def forceQuit(obj):
 
-    # close loading window
-    try:
-        GlobalData_main.loadingApp.closeAllWindows()
-    except Exception:
-        # if the windows is already closed
-        pass
-
     # close object window
     try:
-        obj.closeAllWindows()
+        obj.shutdown()
     except Exception:
         # if the windows is already closed
         pass
@@ -323,20 +310,14 @@ if __name__ == "__main__":
         setupPageui.setupUi(setupPageForm)
 
         # hide the loading page and show setup page
-        GlobalData_main.loadingForm.hide()
         setupPageForm.show()
 
 
         # wait until the user press the continue button on the setup page or force closes the app
-        setupPageApp.exec_()
+        setupPageApp.exec()
         if(not(setupPageUI.GlobalData_setupPageUI.appExisted)):
             sys.exit()
 
-
-        # close the setup page and re show the loading page
-        setupPageForm.close()
-        setupPageApp.closeAllWindows()
-        GlobalData_main.loadingForm.show()
 
         # modifying the new settings and writing to the file
         GlobalData_main.userSettings["username"] = setupPageUI.GlobalData_setupPageUI.username
@@ -344,8 +325,9 @@ if __name__ == "__main__":
 
         Settings.writeSettings()
 
+        setupPageApp.shutdown()
 
-    GlobalData_main.loadingForm.show()
+
 
     # setting up the logging module
     logFileName = None
@@ -395,15 +377,16 @@ if __name__ == "__main__":
         enterPasswordui.setupUi(enterPasswordForm)
         
         # hide loading page and show password page
-        GlobalData_main.loadingForm.hide()
         enterPasswordForm.show()
 
 
 
         # wait until the user press the continue button on the enter password page or force closes the app
-        enterPasswordApp.exec_()
+        enterPasswordApp.exec()
         if(not(enterPasswordUI.GlobalData_enterPasswordUI.appExisted)):
             sys.exit()
+
+        enterPasswordApp.shutdown()
 
         password = enterPasswordUI.GlobalData_enterPasswordUI.password
 
@@ -440,12 +423,13 @@ if __name__ == "__main__":
         enterPasswordForm = QtWidgets.QWidget()
         enterPasswordui = enterPasswordUI.newUIForm(None , firstTime=False , oldPassword=sha512PassFromDB , settingsDict=Settings.returnDict())
         enterPasswordui.setupUi(enterPasswordForm)
-        GlobalData_main.loadingForm.hide()
         enterPasswordForm.show()
 
-        enterPasswordApp.exec_()
+        enterPasswordApp.exec()
         if(not(enterPasswordUI.GlobalData_enterPasswordUI.appExisted)):
             sys.exit()
+
+        enterPasswordApp.shutdown()
 
         # if the user pressed the setting button on the password page
         if(enterPasswordUI.GlobalData_enterPasswordUI.settingsPressed):
@@ -456,10 +440,12 @@ if __name__ == "__main__":
             settingsForm.show()
 
             # wait until the user press the continue button on the settings page or force closes the app
-            settingsApp.exec_()
+            settingsApp.exec()
             if(not(settingsCustomUI.GlobalData_settingsCustomUI.appExisted)):
                 settingsForm.hide()
                 settingsApp.closeAllWindows()
+
+            settingsApp.shutdown()
 
 
     password = enterPasswordUI.GlobalData_enterPasswordUI.password
@@ -480,12 +466,5 @@ if __name__ == "__main__":
 
 
 
-    # close the password page
-    enterPasswordForm.close()
-    enterPasswordApp.closeAllWindows()
-    GlobalData_main.loadingForm.show()
-    
 
-    # loadingscreen will be shown till the user end program end it
-    sys.exit(GlobalData_main.loadingApp.exec_())
 

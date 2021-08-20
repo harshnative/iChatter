@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 from rawUiFiles import enterPassword
 import time
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 import string
 import settingsCustomUI
 import hashlib
