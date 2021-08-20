@@ -29,8 +29,18 @@ class newUIForm(QtWidgets.QWidget , mainSetupPage.Ui_Form):
         # calling the parent setupUi
         super().setupUi(Form)
 
-        self.mainLogoLabel.setScaledContents(True)
 
+        self.mainLogoLabel.setStyleSheet("")
+
+        self.setPixMap = QtGui.QPixmap('images/Group7.svg')
+        self.mainLogoLabel.setPixmap(self.setPixMap)
+        self.mainLogoLabel.resize(self.setPixMap.width(),self.setPixMap.height())
+
+
+        self.userNameInput.setStyleSheet(u"background-color: rgb(80, 80, 80);\n"
+"color: rgb(255, 255, 255);\n"
+"border-color: rgb(112, 112, 112);\n"
+"")
 
         # setting up connections
         self.ContinueButton.pressed.connect(self.continuePressed)

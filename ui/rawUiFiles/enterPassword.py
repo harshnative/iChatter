@@ -30,9 +30,7 @@ class Ui_Form(object):
         self.mainLogoLabel = QLabel(Form)
         self.mainLogoLabel.setObjectName(u"mainLogoLabel")
         self.mainLogoLabel.setMinimumSize(QSize(320, 180))
-        self.mainLogoLabel.setStyleSheet(u"image: url(:/newPrefix/images/Group5.svg);\n"
-"margin-left: auto;\n"
-"margin-right: auto;")
+        self.mainLogoLabel.setStyleSheet(u"background-image: url(:/newPrefix/images/Group7.svg);")
 
         self.verticalLayout.addWidget(self.mainLogoLabel)
 

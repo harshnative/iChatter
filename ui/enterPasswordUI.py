@@ -9,6 +9,13 @@ import settingsCustomUI
 import hashlib
 
 
+
+"""
+    pyside6-uic -o widget.py widget.ui
+    pyside6-rcc -o resource_rc.py resource.qrc
+"""
+
+
 # Global data class
 class GlobalData_enterPasswordUI:
     appExisted = False
@@ -35,11 +42,12 @@ class newUIForm(QtWidgets.QWidget , enterPassword.Ui_Form):
         # calling the parent setupUi
         super().setupUi(Form)
 
-#         self.mainLogoLabel.setStyleSheet(u"image: url(:/newPrefix/images/Group5.svg);\n"
-# "margin-left: auto;\n"
-# "margin-right: auto;\n"
-# "padding-left: 32px;\n"
-# "padding-right: 32px;")
+        self.mainLogoLabel.setStyleSheet("")
+
+        self.setPixMap = QtGui.QPixmap('images/Group7.svg')
+        self.mainLogoLabel.setPixmap(self.setPixMap)
+        self.mainLogoLabel.resize(self.setPixMap.width(),self.setPixMap.height())
+        # self.setPixMap.setMask(self.setPixMap.createMaskFromColor(rgb(0, 8, 31)))
 
         # if the password input is not first time , hide the confirm password lineedit input widget
         if(not(self.firstTime)):
