@@ -64,6 +64,7 @@ import hjson
 import sys
 import sqlite3
 import time
+import string
 
 # importing installed packages
 from logzero import logger, logfile, setup_logger
@@ -232,6 +233,11 @@ class Settings:
                 time.sleep(0.5)
 
             GlobalData_main.iChatterLogger.info("settings dict returned successfully with dict = {}".format(returnedDict))
+
+            returnedDict = cls.validateSettings(returnedDict)
+            
+            print(returnedDict)
+
             return returnedDict
 
         except Exception as e:
@@ -271,6 +277,48 @@ class Settings:
         settingsPath = cls.settingObj.path
         with open(settingsPath , "w+") as file:
             file.write(hjson.dumps(GlobalData_main.userSettings))
+
+
+    # function to validate the settings
+    @classmethod
+    def validateSettings(cls , dictPass):
+        
+        # removing any special chars from the username
+        username = str(dictPass["username"])
+
+        validUsername = ""
+
+        validList = list(string.ascii_lowercase + string.ascii_uppercase)
+
+        for i in username:
+            if( i in validList ):
+                validUsername = validUsername + i
+
+        dictPass["username"] = validUsername
+
+
+        # validating the uepProgram 
+        uepValue = str(dictPass["uepProgram"])
+
+        if(uepValue.lower() != "true"):
+            uepValue = str(False)
+
+        dictPass["uepProgram"] = uepValue
+
+
+        # validating the password value
+        password = str(dictPass["password"])
+
+        if(password.lower() != "true"):
+            password = str(None)
+
+        dictPass["password"] = password
+
+        return dictPass
+
+
+        
+
 
 
 
