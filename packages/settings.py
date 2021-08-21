@@ -3,6 +3,7 @@ import time
 import subprocess
 import os
 import hjson
+import copy
 
 # main class
 class SettingsClass:
@@ -25,6 +26,13 @@ class SettingsClass:
         elif(self.isOnLinux):
             self.path = self.linuxPath
 
+         # default settings file data
+        self.settingsFile = {
+  "uepProgram": "None" ,  
+  "username": "None" ,
+  "password": "None" ,
+}
+
     
     # this method reads data from the settings file and returns it in dictionary format
     def getDict(self):
@@ -35,7 +43,17 @@ class SettingsClass:
                 data = file.read()
 
             dictReturned = hjson.loads(data)
-            return dictReturned
+            
+            if(len(dictReturned) < len(self.settingsFile)):
+                tempSettings = copy.deepcopy(self.settingsFile)
+                tempSettings.update(dictReturned)
+                self.regenerateSettingsFile(tempSettings)
+
+                return tempSettings
+
+            else:
+                return dictReturned
+
 
         # if the settings file is not present
         except FileNotFoundError:
@@ -56,16 +74,11 @@ class SettingsClass:
 
 
     # this method generate the file with default values
-    def regenerateSettingsFile(self):
+    def regenerateSettingsFile(self , settingsFile = None):
 
+        if(settingsFile == None):
+            settingsFile = self.settingsFile
 
-        # default settings file data
-        settingsFile = {
-  "uepProgram": "None" ,  
-  "username": "None" ,
-  "password": "None" ,
-}
-       
         # writing the file
         with open(self.path , "w+") as file:
             file.write(hjson.dumps(settingsFile))
