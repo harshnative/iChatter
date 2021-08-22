@@ -8,6 +8,7 @@ from typing import Set
 
 # importing pyqt
 from PySide6 import QtCore, QtGui, QtWidgets
+from shiboken6.Shiboken import createdByPython
 
 
 # importing ui files
@@ -65,6 +66,8 @@ import sys
 import sqlite3
 import time
 import string
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_v1_5 as Cipher_PKCS1_v1_5
 
 # importing installed packages
 from logzero import logger, logfile, setup_logger
@@ -236,8 +239,6 @@ class Settings:
 
             returnedDict = cls.validateSettings(returnedDict)
             
-            print(returnedDict)
-
             return returnedDict
 
         except Exception as e:
@@ -300,7 +301,7 @@ class Settings:
         # validating the uepProgram 
         uepValue = str(dictPass["uepProgram"])
 
-        if(uepValue.lower() != "true"):
+        if((uepValue.lower() != "true") and (uepValue.lower() != "none")):
             uepValue = str(False)
 
         dictPass["uepProgram"] = uepValue
@@ -513,6 +514,38 @@ if __name__ == "__main__":
         Settings.writeSettings()
 
 
+    keysTableExist = False
+    for i in GlobalData_main.dbObj.getAllTableNames():
+        if(i[0] == "pubpirKeys"):
+            keysTableExist = True
+
+    if(keysTableExist == False):
+        GlobalData_main.dbObj.createTable("pubpirKeys" , [["publicKey" , "BLOB"],["privateKey" , "BLOB"]] , makeSecure=True)
+
+        key = RSA.generate(2048)
+        
+        publicKey = key.public_key()
+        strPublicKey = publicKey.export_key("PEM")
+
+        strPrivateKey = key.export_key("PEM")
+
+        GlobalData_main.dbObj.insertIntoTable("pubpirKeys" , [strPublicKey , strPrivateKey])
+
+    else:
+        colList , resultList = GlobalData_main.dbObj.getDataFromTable("pubpirKeys" , omitID=True)
 
 
+        strPublicKey = resultList[0][0]
+        strPrivateKey = resultList[0][1]
 
+        publicKey = RSA.import_key(strPublicKey)
+        privateKey = RSA.import_key(strPrivateKey)
+
+        msg = "hello world 521874 ][];./"
+        cipher = Cipher_PKCS1_v1_5.new(publicKey)
+        cipher_text = cipher.encrypt(msg.encode())
+
+        print(cipher_text , type(cipher_text))
+
+        cipher2 = Cipher_PKCS1_v1_5.new(privateKey)
+        print(cipher2.decrypt(cipher_text , None).decode())
