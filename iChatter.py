@@ -523,7 +523,7 @@ if __name__ == "__main__":
     if(keysTableExist == False):
         GlobalData_main.dbObj.createTable("pubpirKeys" , [["publicKey" , "BLOB"],["privateKey" , "BLOB"]] , makeSecure=True)
 
-        key = RSA.generate(2048)
+        key = RSA.generate(4096)
         
         publicKey = key.public_key()
         strPublicKey = publicKey.export_key("PEM")

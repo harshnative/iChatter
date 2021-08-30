@@ -7,26 +7,34 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 
 from sqlitewrapper import SqliteCipher
-import json
 
+
+# main class
 class Enc_dec_handler:
 
-    def __init__(self , strPublicKey , strPrivateKey):
+    # constructor
+    def __init__(self , strPublicKey , strPrivateKey , bits = 4096):
+        
+        # init keys
         self.publicKey = RSA.import_key(strPublicKey)
         self.privateKey = RSA.import_key(strPrivateKey)
+
+        # init encrypting objects
         self.cipherPublic = Cipher_PKCS1_v1_5.new(self.publicKey)
         self.cipherPrivate = Cipher_PKCS1_v1_5.new(self.privateKey)
-        self.chunkSize = int(2048//12)
-        self.randomStringSeperator = b"1w0cMwcEjlFdH30UQDsO5xdNiQ0ndJ5gdW3Z0dK78pfsjOvDQ71WQ65S7N2tlmrWb57Ozk14i7DflP296S1VOgnYbHMjN6rh7ab97Y94dDDSu6MUY8KxDk39tVb1al89"
-        
+
+        # define chunks size
+        self.bits = bits
+        self.chunkSize = int(self.bits//12)
 
 
-
+    # function to encrypt a string
     # returns byte type object
     def encryptor_str(self , string):
 
         string = str(string)
 
+        # convert the string into chunks
         chunkList = []
 
         for i in range(0 , len(string) , self.chunkSize):
@@ -34,28 +42,35 @@ class Enc_dec_handler:
 
         encodedStringList = []
 
+        # encrypt the chunks
         for i in chunkList:
             encodedStringChunk = self.cipherPublic.encrypt(i.encode())
             encodedStringList.append(encodedStringChunk)
-            encodedStringList.append(self.randomStringSeperator)
 
+        # join the encrypted chunks and return
         cipher_text = b''.join(encodedStringList)
         return cipher_text
 
 
+    # function to decrypt a encrypted string using above function
     # returns str
     def decryptor_str(self , encryptedStr):
-        chunkList = encryptedStr.split(self.randomStringSeperator)
 
-        # print(len(encryptedStr))
+        chunkList = []
+ 
+        # as the encrypted chunk size is bits // 8 not matter the string input size 
+        bitesby8 = self.bits//8
 
-        # for i in range(0 , len(encryptedStr) , self.chunkSize):
-        #     chunkList.append(encryptedStr[i : i + self.chunkSize])
+        # make chunks
+        for i in range(0 , len(encryptedStr) , bitesby8):
+            chunkList.append(encryptedStr[i : i + bitesby8])
 
         decodedStringList = []
 
+        # decrypt chunks
         for i in chunkList:
 
+            # skip if the chunk lenght is zero
             if(len(i) == 0):
                 continue
 
@@ -64,6 +79,8 @@ class Enc_dec_handler:
 
             decodedStringList.append(decodedStringChunk)
 
+
+        # combine decrypted chunks and return
         decipher_text = b''.join(decodedStringList)
 
         return decipher_text.decode()
@@ -71,19 +88,22 @@ class Enc_dec_handler:
 
     # returns byte type object
     def encryptor_byte(self , byteToEnc):
+
+        # convert the string into chunks
         chunkList = []
 
         for i in range(0 , len(byteToEnc) , self.chunkSize):
             chunkList.append(byteToEnc[i : i + self.chunkSize])
 
-        encodedByteList = []
+        encodedBytesList = []
 
+        # encrypt the chunks
         for i in chunkList:
-            i = str(i)
-            encodedByteChunk = self.cipherPublic.encrypt(i)
-            encodedByteList.append(encodedByteChunk)
+            encodedBytesChunk = self.cipherPublic.encrypt(i)
+            encodedBytesList.append(encodedBytesChunk)
 
-        cipher_text = b''.join(encodedByteList)
+        # join the encrypted chunks and return
+        cipher_text = b''.join(encodedBytesList)
         return cipher_text
 
 
@@ -91,20 +111,31 @@ class Enc_dec_handler:
     def decryptor_byte(self , encryptedByte):
 
         chunkList = []
+ 
+        # as the encrypted chunk size is bits // 8 not matter the string input size 
+        bitesby8 = self.bits//8
 
-        for i in range(0 , len(encryptedByte) , self.chunkSize):
-            chunkList.append(encryptedByte[i : i + self.chunkSize])
+        # make chunks
+        for i in range(0 , len(encryptedByte) , bitesby8):
+            chunkList.append(encryptedByte[i : i + bitesby8])
 
-        decodedByteList = []
+        decodedBytesList = []
 
+        # decrypt chunks
         for i in chunkList:
 
+            # skip if the chunk lenght is zero
+            if(len(i) == 0):
+                continue
+
             # sentinal is the object to return whenever the error is detacted , here it is None
-            decodedByteChunk = self.cipherPrivate.decrypt(i , None)
+            decodedBytesChunk = self.cipherPrivate.decrypt(i , None)
 
-            decodedByteList.append(decodedByteChunk)
+            decodedBytesList.append(decodedBytesChunk)
 
-        decipher_text = b''.join(decodedByteList)
+
+        # combine decrypted chunks and return
+        decipher_text = b''.join(decodedBytesList)
 
         return decipher_text
 
@@ -131,10 +162,17 @@ if __name__ == "__main__":
     print(dec , type(dec))
 
 
-    chunkList = []
 
     with open("images/Group7.svg" , "rb") as file:
         data = bytes(file.read())
+
+
+    enc = obj.encryptor_byte(data)
+
+    dec = obj.decryptor_byte(enc)
+
+    with open("images/newTestedGroup7.svg" , "wb") as file:
+        file.write(dec)
 
 
     
