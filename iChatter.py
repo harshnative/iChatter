@@ -66,8 +66,9 @@ import sys
 import sqlite3
 import time
 import string
+
+# encryption modules 
 from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_v1_5 as Cipher_PKCS1_v1_5
 
 # importing installed packages
 from logzero import logger, logfile, setup_logger
@@ -101,9 +102,9 @@ class GlobalData_main(PreGlobalData):
 
 
     # path for storing the program files
-    folderPathWindows = r"C:\programData\iChatter"
+    folderPathWindows = r"C:\programData\iChatterData"
     folderPathLinux = ""
-    folderPathWindows_simpleSlash = r"C:/programData/iChatter"
+    folderPathWindows_simpleSlash = r"C:/programData/iChatterData"
 
 
     # db path
@@ -152,10 +153,10 @@ if(osUsing == "Linux"):
     GlobalData_main.isOnLinux = True
     if(sys.argv[0] == "iChatter.py"):
         GlobalData_main.troubleshootValue = True
-        GlobalData_main.folderPathLinux = os.getcwd() + "/iChatter"
+        GlobalData_main.folderPathLinux = os.getcwd() + "/iChatterData"
 
     else:
-        GlobalData_main.folderPathLinux = "/opt/iChatter"
+        GlobalData_main.folderPathLinux = "/opt/iChatterData"
 
     # making the program data folder
     try:
@@ -206,9 +207,9 @@ if __name__ == "__main__":
 
     # setting up db path
     if(GlobalData_main.isOnWindows):
-        GlobalData_main.dbPath = GlobalData_main.folderPathWindows_simpleSlash + "/iChatter.db"
+        GlobalData_main.dbPath = GlobalData_main.folderPathWindows_simpleSlash + "/iChatterData.db"
     else:
-        GlobalData_main.dbPath = GlobalData_main.folderPathLinux + "/iChatter.db"
+        GlobalData_main.dbPath = GlobalData_main.folderPathLinux + "/iChatterData.db"
 
 
 
@@ -443,9 +444,9 @@ if __name__ == "__main__":
             obj = SqliteCipher(dataBasePath=GlobalData_main.dbPath , checkSameThread=False , password=password)
         except RuntimeError:
             if(GlobalData_main.isOnWindows):
-                os.system("del iChatter.db")
+                os.system("del {}".format(GlobalData_main.dbPath))
             else:
-                os.system("rm iChatter.db")
+                os.system("rm {}".format(GlobalData_main.dbPath))
 
             obj = SqliteCipher(dataBasePath=GlobalData_main.dbPath , checkSameThread=False , password=password)
             
@@ -538,14 +539,4 @@ if __name__ == "__main__":
         strPublicKey = resultList[0][0]
         strPrivateKey = resultList[0][1]
 
-        publicKey = RSA.import_key(strPublicKey)
-        privateKey = RSA.import_key(strPrivateKey)
-
-        msg = "hello world 521874 ][];./"
-        cipher = Cipher_PKCS1_v1_5.new(publicKey)
-        cipher_text = cipher.encrypt(msg.encode())
-
-        print(cipher_text , type(cipher_text))
-
-        cipher2 = Cipher_PKCS1_v1_5.new(privateKey)
-        print(cipher2.decrypt(cipher_text , None).decode())
+        
