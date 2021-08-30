@@ -124,7 +124,7 @@ if __name__ == "__main__":
 
     obj = Enc_dec_handler(strPublicKey , strPrivateKey)
 
-    enc = obj.encryptor_str("x"*(2048//13))
+    enc = obj.encryptor_str("x"*(2048))
     print(enc , type(enc))
 
     dec = obj.decryptor_str(enc)
