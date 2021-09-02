@@ -1,14 +1,11 @@
 
 # essentail imports
-from genericpath import isfile
 import sys
-from typing import Set
 
 
 
 # importing pyqt
 from PySide6 import QtCore, QtGui, QtWidgets
-from shiboken6.Shiboken import createdByPython
 
 
 # importing ui files
@@ -69,6 +66,7 @@ import string
 
 # encryption modules 
 from Crypto.PublicKey import RSA
+from packages.enc_dec import Enc_dec_handler
 
 # importing installed packages
 from logzero import logger, logfile, setup_logger
@@ -78,7 +76,8 @@ from logzero import logger, logfile, setup_logger
 # importing packages
 from packages import settings
 from packages.sqlitewrapper import SqliteCipher
-
+from packages import socketServer
+from packages import socketClient
 
 # importing uis
 from ui import setupPageUI
@@ -134,6 +133,11 @@ class GlobalData_main(PreGlobalData):
 
     # pysqlitecipher obj 
     dbObj = None
+
+
+    # enc_dec obj
+    enc_decObj = None
+    rsaKeySize = 4096 
 
 
 
@@ -523,20 +527,31 @@ if __name__ == "__main__":
     if(keysTableExist == False):
         GlobalData_main.dbObj.createTable("pubpirKeys" , [["publicKey" , "BLOB"],["privateKey" , "BLOB"]] , makeSecure=True)
 
-        key = RSA.generate(4096)
+        key = RSA.generate(GlobalData_main.rsaKeySize)
         
         publicKey = key.public_key()
-        strPublicKey = publicKey.export_key("PEM")
+        exportedPublicKey = publicKey.export_key("PEM")
 
-        strPrivateKey = key.export_key("PEM")
+        exportedPrivateKey = key.export_key("PEM")
 
-        GlobalData_main.dbObj.insertIntoTable("pubpirKeys" , [strPublicKey , strPrivateKey])
+        GlobalData_main.dbObj.insertIntoTable("pubpirKeys" , [exportedPublicKey , exportedPrivateKey])
 
     else:
         colList , resultList = GlobalData_main.dbObj.getDataFromTable("pubpirKeys" , omitID=True)
 
 
-        strPublicKey = resultList[0][0]
-        strPrivateKey = resultList[0][1]
+        exportedPublicKey = resultList[0][0]
+        exportedPrivateKey = resultList[0][1]
 
+
+        GlobalData_main.enc_decObj = Enc_dec_handler(exportedPublicKey , exportedPrivateKey , GlobalData_main.rsaKeySize)
+
+
+        serverSocketObj = socketServer.customSocket(exportedPublicKey , exportedPrivateKey)
+
+        serverSocketObj.setKey("hello world")
+        print(serverSocketObj.getIpAndPort())
+        serverSocketObj.startAcceptingConnection()
+        
+        
         

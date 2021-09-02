@@ -13,11 +13,11 @@ from sqlitewrapper import SqliteCipher
 class Enc_dec_handler:
 
     # constructor
-    def __init__(self , strPublicKey , strPrivateKey , bits = 4096):
+    def __init__(self , exportedPublicKey , exportedPrivateKey , bits = 4096):
         
         # init keys
-        self.publicKey = RSA.import_key(strPublicKey)
-        self.privateKey = RSA.import_key(strPrivateKey)
+        self.publicKey = RSA.import_key(exportedPublicKey)
+        self.privateKey = RSA.import_key(exportedPrivateKey)
 
         # init encrypting objects
         self.cipherPublic = Cipher_PKCS1_v1_5.new(self.publicKey)
@@ -274,10 +274,10 @@ if __name__ == "__main__":
     colList , resultList = dbObj.getDataFromTable("pubpirKeys" , omitID=True)
 
 
-    strPublicKey = resultList[0][0]
-    strPrivateKey = resultList[0][1]
+    exportedPublicKey = resultList[0][0]
+    exportedPrivateKey = resultList[0][1]
 
-    obj = Enc_dec_handler(strPublicKey , strPrivateKey)
+    obj = Enc_dec_handler(exportedPublicKey , exportedPrivateKey)
 
     enc = obj.encryptor_str("x"*(2048))
     print(enc , type(enc))
