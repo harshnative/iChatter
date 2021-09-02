@@ -1,0 +1,1 @@
+sudo fuser -k 5959/tcp
