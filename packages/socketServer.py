@@ -4,15 +4,16 @@ from contextlib import closing
 from threading import Thread
 from enc_dec import Enc_dec_handler
 from socket import AF_INET, socket, SOCK_STREAM,gethostbyname,gethostname
+from socket import error as socketerror
 from Crypto.PublicKey import RSA
-
+import time
 
 # main class
 class customSocket:
 
 
     # constructor
-    def __init__(self , exportedPublicKey , exportedPrivateKey , rsaKeySize = 4096 , port = 5959 , useAnotherPortNumber = False , maxConnectionLimit = 1 , keyRequired = True , bufferSize = 1024):
+    def __init__(self , exportedPublicKey , exportedPrivateKey , rsaKeySize = 4096 , port = 5959 , useAnotherPortNumber = False , maxConnectionLimit = 2 , keyRequired = True , bufferSize = 1024):
 
         # dict to store cleint details
         self.clientsDict = {}
@@ -61,7 +62,7 @@ class customSocket:
             # bind the server
             self.serverObj.bind(self.serverAddress)
 
-        except socket.error as e:
+        except socketerror as e:
 
                 # if the port number is unavailable
                 if(e.errno == errno.EADDRINUSE):
@@ -121,13 +122,19 @@ class customSocket:
         # virtually can handle unlimited connections
         while(True):
 
+            # accept a connection request
             client , clientAddress = self.serverObj.accept()
 
+            # send the public key of the server to client , so that it can send encrypted data to us
             client.send(self.exportedPublicKey)
 
+            # get public key from client so that we can send encrypted data to client
             clientPubKey = client.recv(self.bufferSize)
+
+            # convert key into rsa format
             clientPubKey = RSA.import_key(clientPubKey)
 
+            # if the key verification is on then get the key from the client before accepting the connection
             if(self.keyRequired):
                 verificationKey = client.recv(self.bufferSize)
 
@@ -135,18 +142,95 @@ class customSocket:
 
                 strDecrypted_verificationKey = str(decrypted_verificationKey , "utf-8")
 
+                # if the key does not match , reject connection and send message
                 if(strDecrypted_verificationKey != self.connectionKey):
                     toSend = bytes("connection rejected" , "utf-8")
                     toSendEnc = self.encObj.encryptor_byte_external(toSend , clientPubKey)
                     client.send(toSendEnc)
                     continue
+
+                # else accept connection and send message status
                 else:
                     toSend = bytes("connection accepted" , "utf-8")
                     toSendEnc = self.encObj.encryptor_byte_external(toSend , clientPubKey)
                     client.send(toSendEnc)
 
+            else:
+                toSend = bytes("connection accepted" , "utf-8")
+                toSendEnc = self.encObj.encryptor_byte_external(toSend , clientPubKey)
+                client.send(toSendEnc)
+
+            # receive the name of the client 
+            name = client.recv(self.bufferSize)
+
+            decrypted_name = self.encObj.decryptor_byte_external(name , self.privateKey)
+
+            strDecrypted_name = str(decrypted_name , "utf-8")
+
             # storing the new connection details in dictionary
-            self.clientsDict[client] = [clientAddress , clientPubKey]
+            self.clientsDict[client] = [strDecrypted_name , clientAddress , clientPubKey]
 
             # init thread
-            # Thread(target=cls.handleClient , args=(client , )).start()
+            Thread(target=self.handleConnection , args=(client , clientPubKey ,)).start()
+
+    
+    # function to handle client connection
+    def handleConnection(self , client , clientPubKey):
+
+        # flow = 
+        # get client name
+        # extract that client detail
+        # get which type of message it is
+        # get message
+        # send client name who is sending it
+        # send what type of message it is
+        # send the message
+
+        while(True):
+
+            # get the client name which server needs to forward the message
+            clientName = client.recv(self.bufferSize)
+
+            # decrypting the cleint name
+            decrypted_clientName =  self.encObj.decryptor_byte_external(clientName , self.privateKey)
+
+            decrypted_clientName = str(decrypted_clientName , "utf-8")
+
+
+            # just init things
+            toSendClient = client
+
+            # [strDecrypted_name , clientAddress , clientPubKey]
+            toSendClientDetails = []
+
+            for i,j in self.clientsDict.items():
+                if(j[0] == decrypted_clientName):
+                    toSendClient = i
+                    toSendClientDetails = j
+
+
+            # check what of message need to be sent to client
+            receivingWhat = client.recv(self.bufferSize)
+            receivingWhat_decrypted = self.encObj.decryptor_byte_external(receivingWhat , self.privateKey)
+
+            # get the message
+            messageReceived = client.recv(self.bufferSize)
+
+            # decrypting the message
+            decrypted_messageReceived =  self.encObj.decryptor_byte_external(messageReceived , self.privateKey)
+            
+
+
+            # send client name
+            enc_toSend = self.encObj.encryptor_byte_external(decrypted_clientName , toSendClientDetails[2])
+            toSendClient.send(enc_toSend)
+
+            # send what type of message it is
+            enc_toSend = self.encObj.encryptor_byte_external(receivingWhat_decrypted , toSendClientDetails[2])
+            toSendClient.send(enc_toSend)
+
+
+            toSendEnc = self.encObj.encryptor_byte_external(decrypted_messageReceived , toSendClientDetails[2])
+            toSendClient.send(toSendEnc)
+
+            print("sent message to " , toSendClientDetails[0])

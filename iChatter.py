@@ -543,15 +543,35 @@ if __name__ == "__main__":
         exportedPublicKey = resultList[0][0]
         exportedPrivateKey = resultList[0][1]
 
+        choice = int(input("enter choice : "))
+
+
 
         GlobalData_main.enc_decObj = Enc_dec_handler(exportedPublicKey , exportedPrivateKey , GlobalData_main.rsaKeySize)
 
 
-        serverSocketObj = socketServer.customSocket(exportedPublicKey , exportedPrivateKey)
+        if(choice == 1):
+            serverSocketObj = socketServer.customSocket(exportedPublicKey , exportedPrivateKey)
 
-        serverSocketObj.setKey("hello world")
-        print(serverSocketObj.getIpAndPort())
-        serverSocketObj.startAcceptingConnection()
+            serverSocketObj.setKey("hello world")
+            print(serverSocketObj.getIpAndPort())
+            serverSocketObj.startAcceptingConnection()
+        else:
+            key = RSA.generate(GlobalData_main.rsaKeySize)
+        
+            publicKey = key.public_key()
+            exportedPublicKey = publicKey.export_key("PEM")
+
+            exportedPrivateKey = key.export_key("PEM")
+            clientSocketObj = socketClient.customSocket(exportedPublicKey , exportedPrivateKey)
+
+            clientSocketObj.setKey("hello world")
+
+            ip = input("enter ip : ")
+            port = int(input("enter port : "))
+
+            clientSocketObj.verifyConnection(ip , port)
+
         
         
         
