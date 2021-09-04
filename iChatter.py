@@ -1,6 +1,7 @@
 
 # essentail imports
 import sys
+from types import CellType
 
 
 
@@ -556,6 +557,8 @@ if __name__ == "__main__":
             serverSocketObj.setKey("hello world")
             print(serverSocketObj.getIpAndPort())
             serverSocketObj.startAcceptingConnection()
+
+
         else:
             key = RSA.generate(GlobalData_main.rsaKeySize)
         
@@ -563,14 +566,26 @@ if __name__ == "__main__":
             exportedPublicKey = publicKey.export_key("PEM")
 
             exportedPrivateKey = key.export_key("PEM")
-            clientSocketObj = socketClient.customSocket(exportedPublicKey , exportedPrivateKey)
+            name = input("enter name : ")
+            cname = input("enter client name : ")
+            clientSocketObj = socketClient.customSocket(exportedPublicKey , exportedPrivateKey , name , cname)
 
             clientSocketObj.setKey("hello world")
 
-            ip = input("enter ip : ")
+            # ip = input("enter ip : ")
             port = int(input("enter port : "))
 
+            ip = "192.168.0.102"
+            # port = 5959
+
             clientSocketObj.verifyConnection(ip , port)
+
+            while(True):
+                toSend = input("enter something to send : ")
+                clientSocketObj.toSendBuffer.append(toSend)
+                clientSocketObj.toSend = True
+
+                print(clientSocketObj.receivedBuffer)
 
         
         

@@ -8,6 +8,8 @@ images/
 
 *.log
 
+djangoServer/iChatterServer/iChatterServer/settings.py
+
 
 pytests/
 

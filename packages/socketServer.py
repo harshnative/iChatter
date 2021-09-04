@@ -1,9 +1,9 @@
-import socket 
+from socket import SOL_SOCKET, SO_REUSEADDR
 import errno
 from contextlib import closing
 from threading import Thread
 from enc_dec import Enc_dec_handler
-from socket import AF_INET, socket, SOCK_STREAM,gethostbyname,gethostname
+from socket import AF_INET, socket,TCP_NODELAY, SOCK_STREAM,gethostbyname,gethostname
 from socket import error as socketerror
 from Crypto.PublicKey import RSA
 import time
@@ -13,7 +13,7 @@ class customSocket:
 
 
     # constructor
-    def __init__(self , exportedPublicKey , exportedPrivateKey , rsaKeySize = 4096 , port = 5959 , useAnotherPortNumber = False , maxConnectionLimit = 2 , keyRequired = True , bufferSize = 1024):
+    def __init__(self , exportedPublicKey , exportedPrivateKey , rsaKeySize = 4096 , port = 5959 , useAnotherPortNumber = True , maxConnectionLimit = 2 , keyRequired = True , bufferSize = 1024):
 
         # dict to store cleint details
         self.clientsDict = {}
@@ -45,7 +45,7 @@ class customSocket:
 
         # setting up server obj
         # getting ip address
-        s = socket(AF_INET, SOCK_STREAM)
+        s = socket(AF_INET, TCP_NODELAY)
         s.connect(("8.8.8.8", 80))
 
 
@@ -55,7 +55,7 @@ class customSocket:
         self.serverAddress = (self.host , self.port)
 
         # init server object
-        self.serverObj = socket(AF_INET, SOCK_STREAM)
+        self.serverObj = socket(AF_INET, TCP_NODELAY)
 
         try:
 
@@ -68,7 +68,7 @@ class customSocket:
                 if(e.errno == errno.EADDRINUSE):
 
                     # if using another port is not allowed
-                    if(useAnotherPortNumber):
+                    if(not(useAnotherPortNumber)):
                         raise RuntimeError("{} port is currenlty in use".format(self.port))
 
                     else:
@@ -76,10 +76,10 @@ class customSocket:
                         # getting the port number
                         with closing(s) as s:
                             s.close()
-                            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                            s = socket(AF_INET, TCP_NODELAY)
 
                             s.bind(('', 0))
-                            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                            s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
                                 
                             # assign the port to object
                             self.port = s.getsockname()[1]
@@ -173,6 +173,7 @@ class customSocket:
             # init thread
             Thread(target=self.handleConnection , args=(client , clientPubKey ,)).start()
 
+            print("connected = " , clientAddress , strDecrypted_name)
     
     # function to handle client connection
     def handleConnection(self , client , clientPubKey):
@@ -188,6 +189,8 @@ class customSocket:
 
         while(True):
 
+            print("in")
+
             # get the client name which server needs to forward the message
             clientName = client.recv(self.bufferSize)
 
@@ -198,7 +201,7 @@ class customSocket:
 
 
             # just init things
-            toSendClient = client
+            toSendClient = None
 
             # [strDecrypted_name , clientAddress , clientPubKey]
             toSendClientDetails = []
@@ -208,17 +211,20 @@ class customSocket:
                     toSendClient = i
                     toSendClientDetails = j
 
+            print("ini" , decrypted_clientName)
 
             # check what of message need to be sent to client
             receivingWhat = client.recv(self.bufferSize)
             receivingWhat_decrypted = self.encObj.decryptor_byte_external(receivingWhat , self.privateKey)
 
+            print("iniii" , receivingWhat_decrypted)
             # get the message
             messageReceived = client.recv(self.bufferSize)
 
             # decrypting the message
             decrypted_messageReceived =  self.encObj.decryptor_byte_external(messageReceived , self.privateKey)
             
+            print("iniiii" , decrypted_messageReceived)
 
 
             # send client name

@@ -1,11 +1,10 @@
-import socket 
 import errno
 from contextlib import closing
 from threading import Thread
 
 from Crypto.PublicKey import RSA
 from enc_dec import Enc_dec_handler
-from socket import AF_INET, socket, SOCK_STREAM,gethostbyname,gethostname
+from socket import AF_INET, socket,TCP_NODELAY , SOCK_STREAM,gethostbyname,gethostname
 import time
 from collections import deque
 
@@ -50,7 +49,7 @@ class customSocket:
 
         # setting up server obj
         # getting ip address
-        s = socket(AF_INET, SOCK_STREAM)
+        s = socket(AF_INET, TCP_NODELAY)
         s.connect(("8.8.8.8", 80))
 
 
@@ -60,7 +59,7 @@ class customSocket:
         self.serverAddress = (self.host , self.port)
 
         # init server object
-        self.serverObj = socket(AF_INET, SOCK_STREAM)
+        self.serverObj = socket(AF_INET, TCP_NODELAY)
 
         self.serverPubKey = b""
 
@@ -143,7 +142,6 @@ class customSocket:
     def sendingConnection(self):
 
         while(True):
-        
             if(self.toSend and (len(self.toSendBuffer) > 0)):
 
                 thingToSend = self.toSendBuffer.popleft()
@@ -157,20 +155,28 @@ class customSocket:
                 enc_toSend = self.encObj.encryptor_byte_external(toSend , self.serverPubKey)
                 self.serverObj.send(enc_toSend)
 
+                self.serverObj.send(b"")
+
                 # send the what type of message it is going to be
                 toSend = bytes(type_thingToSend , "utf-8")
                 enc_toSend = self.encObj.encryptor_byte_external(toSend , self.serverPubKey)
                 self.serverObj.send(enc_toSend)
 
+                print(type_thingToSend)
+
                 # send the message
                 if(type_thingToSend == "string"):
                     toSend = bytes(thingToSend , "utf-8")
-                    enc_keyToSend = self.encObj.encryptor_byte_external(toSend , self.serverPubKey)
-                    self.serverObj.send(enc_keyToSend)
+                    enc_toSend = self.encObj.encryptor_byte_external(toSend , self.serverPubKey)
+                    self.serverObj.send(enc_toSend)
+                    print("sent")
+
                 else:
                     toSend = thingToSend
-                    enc_keyToSend = self.encObj.encryptor_byte_external(toSend , self.serverPubKey)
-                    self.serverObj.send(enc_keyToSend)
+                    enc_toSend = self.encObj.encryptor_byte_external(toSend , self.serverPubKey)
+                    self.serverObj.send(enc_toSend)
+                    print("sent")
+
             
             time.sleep(self.delay)
 
@@ -203,7 +209,5 @@ class customSocket:
 
             else:
                 self.receivedBuffer.append([str_decrypted_clientName , "byte" , decrypted_message])
-
-
 
 
