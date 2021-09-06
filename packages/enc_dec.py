@@ -282,6 +282,12 @@ if __name__ == "__main__":
     enc = obj.encryptor_str("x"*(2048))
     print(enc , type(enc))
 
+    import base64 
+    enc = base64.b64encode(enc)
+    print(enc)
+
+    enc = base64.b64decode(enc)
+
     dec = obj.decryptor_str(enc)
     print(dec , type(dec))
 
@@ -292,6 +298,10 @@ if __name__ == "__main__":
 
 
     enc = obj.encryptor_byte(data)
+
+    enc = base64.b64encode(enc)
+
+    enc = base64.b64decode(enc)
 
     dec = obj.decryptor_byte(enc)
 

@@ -23,6 +23,14 @@ releases/
 
 packages/apiStorage/
 
+*.db
+
+*.sqlite3
+
+cert.pem
+key.pem
+
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
